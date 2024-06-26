@@ -1,0 +1,149 @@
+
+lb=LabelBinarizer()\n",
+    "labels = lb.fit_transform(labels)\n",
+    "labels = to_categorical(labels
+
+
+
+train_X,test_X,train_Y,test_Y = train_test_split(data,labels,test_size=0.20,random_state=10,stratify=labels)"
+
+
+
+
+aug=ImageDataGenerator(\n",
+    "                       rotation_range=20,\n",
+    "                       zoom_range=0.15,width_shift_range=0.2,\n",
+    "                       height_shift_range=0.2,shear_range=0.15,\n",
+    "                       horizontal_flip=True,\n",
+    "                       vertical_flip=True,\n",
+    "                       fill_mode='nearest'\n",
+    "                       )"
+
+
+
+
+
+
+Build Model\n",
+    "input_image = Input(shape=input_shape)\n",
+    "# 1st Conv layer\n",
+    "model = Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=input_shape)(input_image)\n",
+    "model = MaxPooling2D((2, 2),padding='same')(model)\n",
+    "# 2nd Conv layer\n",
+    "model = Conv2D(32, (3, 3), activation='relu', padding='same')(model)\n",
+    "model = MaxPooling2D((2, 2),padding='same')(model)\n",
+    "# 3rd Conv layer\n",
+    "model = Conv2D(64, (3, 3), activation='relu', padding='same')(model)\n",
+    "model = MaxPooling2D((2, 2),padding='same')(model)\n",
+    "# 4th Conv layer\n",
+    "model = Conv2D(128, (3, 3), activation='relu', padding='same')(model)\n",
+    "model = MaxPooling2D((2, 2),padding='same')(model)\n",
+    "# 5th Conv layer\n",
+    "model = Conv2D(256, (3, 3), activation='relu', padding='same')(model)\n",
+    "model = MaxPooling2D((2, 2),padding='same')(model)\n",
+    "# FC layers\n",
+    "model = Flatten()(model)\n",
+    "#model = Dense(1024, kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01))(model)\n",
+    "model = Dense(1024)(model)\n",
+    "#model = Dropout(0.2)(model)\n",
+    "\n",
+    "#model = Dense(64, kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01))(model)\n",
+    "model = Dense(64)(model)\n",
+    "#model = Dropout(0.2)(model)\n",
+    "\n",
+    "output= Dense(2, activation='softmax')(model)\n",
+    "\n",
+    "model = Model(inputs=[input_image], outputs=[output])
+
+
+
+outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Model: \"model_1\"\n",
+      "_________________________________________________________________\n",
+      "Layer (type)                 Output Shape              Param #   \n",
+      "=================================================================\n",
+      "input_13 (InputLayer)        [(None, 96, 96, 3)]       0         \n",
+      "_________________________________________________________________\n",
+      "conv2d_5 (Conv2D)            (None, 96, 96, 16)        448       \n",
+      "_________________________________________________________________\n",
+      "max_pooling2d_5 (MaxPooling2 (None, 48, 48, 16)        0         \n",
+      "_________________________________________________________________\n",
+      "conv2d_6 (Conv2D)            (None, 48, 48, 32)        4640      \n",
+      "_________________________________________________________________\n",
+      "max_pooling2d_6 (MaxPooling2 (None, 24, 24, 32)        0         \n",
+      "_________________________________________________________________\n",
+      "conv2d_7 (Conv2D)            (None, 24, 24, 64)        18496     \n",
+      "_________________________________________________________________\n",
+      "max_pooling2d_7 (MaxPooling2 (None, 12, 12, 64)        0         \n",
+      "_________________________________________________________________\n",
+      "conv2d_8 (Conv2D)            (None, 12, 12, 128)       73856     \n",
+      "_________________________________________________________________\n",
+      "max_pooling2d_8 (MaxPooling2 (None, 6, 6, 128)         0         \n",
+      "_________________________________________________________________\n",
+      "conv2d_9 (Conv2D)            (None, 6, 6, 256)         295168    \n",
+      "_________________________________________________________________\n",
+      "max_pooling2d_9 (MaxPooling2 (None, 3, 3, 256)         0         \n",
+      "_________________________________________________________________\n",
+      "flatten_7 (Flatten)          (None, 2304)              0         \n",
+      "_________________________________________________________________\n",
+      "dense_44 (Dense)             (None, 1024)              2360320   \n",
+      "_________________________________________________________________\n",
+      "dense_45 (Dense)             (None, 64)                65600     \n",
+      "_________________________________________________________________\n",
+      "dense_46 (Dense)             (None, 2)                 130       \n",
+      "=================================================================\n",
+      "Total params: 2,818,658\n",
+      "Trainable params: 2,818,658\n",
+      "Non-trainable params: 0\n",
+
+
+Here’s an overview and key points of the CNN architecture you’ve provided:
+
+Input Layer: Accepts images with the shape defined by input_shape.
+Convolutional Layers: Five convolutional layers with increasing filter sizes (16, 32, 64, 128, 256). Each layer uses a (3 \times 3) kernel and ‘relu’ activation function, followed by max pooling with a (2 \times 2) window to reduce spatial dimensions.
+Flattening Layer: Flattens the output of the last convolutional layer to a single vector.
+Fully Connected (Dense) Layers: Two dense layers with 1024 and 64 units respectively. The first dense layer could potentially include L2 regularization and dropout for regularization purposes, but these are commented out in the provided code.
+Output Layer: A dense layer with 2 units and ‘softmax’ activation function for binary classification.
+Model Definition: The model inputs and outputs are defined, creating the full model ready for training.
+Key Points:
+
+The architecture follows a typical pattern of alternating convolutional and max pooling layers, which is effective for feature extraction in image data.
+Increasing the number of filters in deeper layers allows the network to learn more complex features.
+The use of ‘relu’ activation function helps to mitigate the vanishing gradient problem.
+Max pooling is used to reduce the dimensionality of the feature maps, which also contributes to making the network less sensitive to the location of features.
+The final fully connected layers serve as a classifier on top of the features extracted by the convolutional base.
+Regularization techniques like L2 regularization and dropout are included in the code but commented out. These can be useful to prevent overfitting if needed.
+This architecture is suitable for binary image classification tasks such as face mask detection. Remember to compile the model with an appropriate optimizer and loss function before training.
+
+
+Overview:
+
+-The model is a Convolutional Neural Network (CNN) designed for image input.
+-It consists of five convolutional layers, each followed by max-pooling layers.
+-After the convolutional layers, the model has two fully connected (dense) layers.
+-The final output layer uses softmax activation for binary classification.
+Key Points:
+
+1.Input Layer:
+	Accepts images with shape defined by input_shape.
+2.Convolutional Layers:
+	1st Conv Layer: 16 filters, 3x3 kernel size, ReLU activation, same padding.
+	2nd Conv Layer: 32 filters, 3x3 kernel size, ReLU activation, same padding.
+	3rd Conv Layer: 64 filters, 3x3 kernel size, ReLU activation, same padding.
+	4th Conv Layer: 128 filters, 3x3 kernel size, ReLU activation, same padding.
+	5th Conv Layer: 256 filters, 3x3 kernel size, ReLU activation, same padding.
+3.Max-Pooling Layers:
+	Each max-pooling layer has a 2x2 pool size and same padding.
+4.Fully Connected (Dense) Layers:
+	Flattens the output from the convolutional layers.
+	1st Dense Layer: 1024 units (commented out regularization and dropout).
+	2nd Dense Layer: 64 units (commented out regularization and dropout).
+5.Output Layer:
+	Dense layer with 2 units for binary classification.
+	Uses softmax activation function.
+6.Model Compilation:
+	The model takes the input image and produces an output prediction.
